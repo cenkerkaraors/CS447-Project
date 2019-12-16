@@ -45,7 +45,7 @@ class Main(tk.Frame):
         self.tree.column('Location', width=400)
         self.tree.heading('Location', text='Dest Location')
         self.tree.pack(side=tk.TOP)
-        self.addtotree(self)
+        self.addtotree()
         scrollBar = Scrollbar(self, orient="vertical", command=self.tree.yview)
 
         self.tree.configure(yscrollcommand=scrollBar.set)
@@ -54,14 +54,13 @@ class Main(tk.Frame):
         self.tree1.column('Location', width=400)
         self.tree1.heading('Location', text='Src Location')
         self.tree1.pack()
-        self.addtotree1(self)
+        self.addtotree1()
 
     def open_dialog(self):
         Child()
-        self.addtotree(self)
-        self.addtotree1(self)
+        self.addtotree()
+        self.addtotree1()
 
-    @staticmethod
     def addtotree(self):
         records = self.tree.get_children()
         for element in records:
@@ -70,7 +69,6 @@ class Main(tk.Frame):
         for i in apps:
             self.tree.insert('', 'end', i, )
             self.tree.set(i, 'Location', i)
-    @staticmethod
     def addtotree1(self):
         records = self.tree1.get_children()
         for element in records:
@@ -79,6 +77,10 @@ class Main(tk.Frame):
         for ii in rec:
             self.tree1.insert('', 'end', ii)
             self.tree1.set(ii, 'Location', ii)
+    def getTree(self) :
+        return self.tree
+    def getTree1(self) :
+        return self.tree1
 
 
 class Child(tk.Toplevel):
@@ -128,16 +130,34 @@ class Child(tk.Toplevel):
         self.grab_set()
         self.focus_set()
 
+    def child_Tree(self) :
+            tree = Main.getTree()
+            records = tree.get_children()
+
+            for x in records :
+                tree.delete(x)
+            
+            for x in apps :
+                tree.insert('', 'end', x,)
+                tree.set(x,'Location',x)
+
+
+
+
+
     def takeit(self):
         # rec.append(self.usertext.get())
         # print(self.usertext.get())
         #m = Main()
         #m.addtotree(self)
         #m.addtotree1(self)
-        Main.addtotree(self)
-        Main.addtotree1(self)
+        child_Tree()
+        
 
         self.destroy()
+
+
+
 
 
 if __name__ == "__main__":

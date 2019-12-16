@@ -342,8 +342,11 @@ def showDirs(parent):
         label = Label(parent, text=str, bg="white")
         label.pack()
 
+    saveDirectories()
+
 
 def init_gui():
+    loadDirectories()
     # Main Page
     root = Tk()
     root.title("S-Play")
@@ -367,7 +370,7 @@ def init_gui():
     frame = Frame(left_frame, bg="white")
     frame.place(relwidth=0.8, relheight=0.8, relx=0.1, rely=0.1)
 
-    Label
+    #Label
 
     right_frame = Frame(root)
     right_frame.pack(side=RIGHT)
@@ -390,11 +393,27 @@ class part2(Thread):
     def run(self):
         init_Server()
 
+def saveDirectories() :
+    f = open('save.txt', 'w')
+
+    for x in directory_List :
+        str = x[0] + " " + x[1] + "\n"
+        f.write(str)
+def loadDirectories() :
+    f = open('save.txt', 'r')
+    lines = f.readlines()
+
+    for x in lines :
+        if (x != "") :
+            temp = x.split()
+            if(len(temp) == 2) :
+                tup = (temp[0], temp[1])
+                directory_List.append(tup)
+
 
 t2 = part2()
 
 t2.start()
 init_gui()
 
-with open('save.txt', 'w') as f:
-    f.write(str(directory_List) + ',')
+

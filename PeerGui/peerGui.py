@@ -253,10 +253,7 @@ def init_Server():
 
 def init_Client():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-    ip = '192.168.1.20'  # home ipv4
-
-    ip = '192.168.43.220'
-    ip = '192.168.43.197'
+    ip = ''
     print("Info", ip)
     print("Host: ", ip)
     port = 5000

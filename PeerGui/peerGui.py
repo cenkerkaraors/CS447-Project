@@ -93,8 +93,6 @@ def recvFile_Server(directory, file_name, server_socket):
         control = 0
     print("File Received: ", file_name)
 
-
-# /home/cenkerkaraors/Desktop/CS447Test/Client
 def sync_Server(folder, conn, server_socket):  # Syncs a folder takes folder and connection
     server_files = analyzeContent(folder)
     sendList(server_files, conn)
@@ -198,7 +196,7 @@ def sync_Client(client_folder, client_socket, ip, index):  # Syncs a folder take
     incoming = pickle.loads(incoming_data)
     print("Client Is getting incoming" , incoming)
     # till here
-    # At this point we have all needed informatio
+    # At this point we have all needed information
     if(len(incoming) != 0): 
         message = "ok"
         response = client_socket.recv(1024).decode()
@@ -433,10 +431,5 @@ t2 = part2()
 t2.start()
 
 init_gui()
-
-#/home/cenkerkaraors/Desktop/Test447/client
-#/home/cenkerkaraors/Desktop/Test447/server
-#/home/cenkerkaraors/Desktop/CS447Test/Client
-#/home/cenkerkaraors/Desktop/CS447Test/Server
 
 

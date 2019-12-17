@@ -11,7 +11,7 @@ from os.path import isfile, join
 import pickle
 import sys
 
-
+port = 5001
 directory_List = []
 # Common
 def analyzeContent(directory):  # Takes a directory and returns a list of contents
@@ -88,6 +88,7 @@ def recvFile_Server(directory, file_name, server_socket):
                 f.write(data)
             f.close()
 
+
         conn.close()
         control = 0
     print("File Received: ", file_name)
@@ -105,41 +106,47 @@ def sync_Server(folder, conn, server_socket):  # Syncs a folder takes folder and
     print("Client Files:", client_files)
 
     outgoing = compareFiles(server_files, client_files)
-    print("Sending Files: ")
+    print("Sending Server Files: ")
+
+    #I add thid
+    sendList(outgoing, conn)
+    incoming_data = conn.recv(1024)
+    incoming = pickle.loads(incoming_data)
+    print("Server Is getting incoming" , incoming)
     # At this point we have all needed information
-    message = "1"
-    conn.send(message.encode())  # I have files to send
+    if(len(outgoing) != 0) :
+        message = "1"
+        conn.send(message.encode())  # I have files to send
+        for x in range(len(outgoing)):
+            if (conn.recv(1024).decode() == "ok"):
+                filename = outgoing[x][0]
+                conn.send(filename.encode())
+                sendFile_Server(folder, filename, server_socket)
 
-    for x in range(len(outgoing)):
-        if (conn.recv(1024).decode() == "ok"):
-            filename = outgoing[x][0]
-            conn.send(filename.encode())
-            sendFile_Server(folder, filename, server_socket)
+                if (x != len(outgoing) - 1):
+                    message = "1"
+                    conn.send(message.encode())  # I have some file
+                else:
+                    message = "0"
+                    conn.send(message.encode())
 
-            if (x != len(outgoing) - 1):
-                message = "1"
-                conn.send(message.encode())  # I have some file
-            else:
-                message = "0"
-                conn.send(message.encode())
-
-    print("Server Receiving: ")
-    message = "ok"
-    response = conn.recv(1024).decode()
-    while (response == "1"):
+    if(len(incoming) != 0): 
+        print("Server Receiving: ")
         message = "ok"
-        conn.send(message.encode())
-        filename = conn.recv(1024).decode()
-        recvFile_Server(folder, filename, server_socket)
-        message = ""
         response = conn.recv(1024).decode()
+        while (response == "1"):
+            message = "ok"
+            conn.send(message.encode())
+            filename = conn.recv(1024).decode()
+            recvFile_Server(folder, filename, server_socket)
+            message = ""
+            response = conn.recv(1024).decode()
 
 
 # Client Specific
 
-def recvFile_Client(directory, file_name, ip):
+def recvFile_Client(directory, file_name, ip) :
     temp_socket = socket.socket()
-    port = 5000
     temp_socket.connect((ip, port))
     with open(directory + "/" + file_name, 'wb') as f:
         while True:
@@ -156,7 +163,6 @@ def recvFile_Client(directory, file_name, ip):
 
 def sendFile_Client(directory, file_name, ip):
     temp_socket = socket.socket()
-    port = 5000
     temp_socket.connect((ip, port))
 
     f = open(directory + "/" + file_name, 'rb')
@@ -169,8 +175,8 @@ def sendFile_Client(directory, file_name, ip):
     print("File Sent: ", file_name)
 
 
-def sync_Client(client_folder, client_socket, ip):  # Syncs a folder takes folder and connection
-    folder_request = directory_List[0][1]
+def sync_Client(client_folder, client_socket, ip, index):  # Syncs a folder takes folder and connection
+    folder_request = directory_List[index][1]
     client_socket.send(folder_request.encode())
 
     response = client_socket.recv(1024)
@@ -186,42 +192,48 @@ def sync_Client(client_folder, client_socket, ip):  # Syncs a folder takes folde
     print("Server Files:", server_files)
 
     outgoing = compareFiles(client_files, server_files)
-
+    #İ add
+    sendList(outgoing, client_socket)
+    incoming_data = client_socket.recv(1024)
+    incoming = pickle.loads(incoming_data)
+    print("Client Is getting incoming" , incoming)
+    # till here
     # At this point we have all needed informatio
-    message = "ok"
-    response = client_socket.recv(1024).decode()
-    while (response == "1"):
+    if(len(incoming) != 0): 
         message = "ok"
-        client_socket.send(message.encode())  # send ok
-        filename = client_socket.recv(1024).decode()
-        recvFile_Client(client_folder, filename, ip)  # received file
+        response = client_socket.recv(1024).decode()
+        while (response == "1"):
+            message = "ok"
+            client_socket.send(message.encode())  # send ok
+            filename = client_socket.recv(8192).decode()
+            recvFile_Client(client_folder, filename, ip)  # received file
 
-        message = ""
+            message = ""
 
-        response = client_socket.recv(1024).decode()  # continue or not
+            response = client_socket.recv(1024).decode()  # continue or not
 
     # Client Sends
-    print("Sending Files: ")
-    message = "1"
-    client_socket.send(message.encode())
-    for x in range(len(outgoing)):
-        if (client_socket.recv(1024).decode() == "ok"):
-            filename = outgoing[x][0]
-            client_socket.send(filename.encode())
-            sendFile_Client(client_folder, filename, ip)
+    if(len(outgoing) != 0) :
+        print("Sending Client Files: ")
+        message = "1"
+        client_socket.send(message.encode())
+        for x in range(len(outgoing)):
+            if (client_socket.recv(1024).decode() == "ok"):
+                filename = outgoing[x][0]
+                client_socket.send(filename.encode())
+                sendFile_Client(client_folder, filename, ip)
 
-            if (x != len(outgoing) - 1):
-                message = "1"
-                client_socket.send(message.encode())
-            else:
-                message = "0"
-                client_socket.send(message.encode())  # Done
+                if (x != len(outgoing) - 1):
+                    message = "1"
+                    client_socket.send(message.encode())
+                else:
+                    message = "0"
+                    client_socket.send(message.encode())  # Done
 
 
 def init_Server():
     server_socket = socket.socket()
     ip = '0.0.0.0'
-    port = 5000
 
     server_socket.bind((ip, port))
 
@@ -244,25 +256,24 @@ def init_Server():
 
         sync_Server(request, conn, server_socket)
 
-        conn.close
-        control = 0
+        conn.close()
+        #control = 0
 
     server_socket.close()
     print("Closed")
 
 
-def init_Client():
+def init_Client(index):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
     ip = ''
+    
     print("Info", ip)
     print("Host: ", ip)
-    port = 5000
 
     print("Client Started")
     client_socket.connect((ip, port))
     print("Connected to Server")
-    # /home/cenkerkaraors/Desktop/CS447Test/Client
-    sync_Client(directory_List[0][0], client_socket, ip)
+    sync_Client(directory_List[index][0], client_socket, ip,index)
 
     client_socket.close()
     print("Closed")  # done
@@ -296,12 +307,13 @@ def add_CallBack():
     directory_Page.mainloop()
 
 
-def sync_CallBack():
-    init_Client()
+def sync_CallBack() :
 
     myStr = ""
-    for x in directory_List:
-        myStr = myStr + "From: " + x[0] + " To: " + x[1] + "\n"
+    for x in range(len(directory_List)):
+        myStr = myStr + "From: " + directory_List[x][0] + " To: " + directory_List[x][1] + "\n"
+        init_Client(x)
+        print("Done: ", myStr)
 
     messagebox.showinfo(message="Sync Complete: \n" + myStr)
 
@@ -311,6 +323,7 @@ def exit_CallBack(page):
 
 def close_CallBack(page):
     page.withdraw()
+    os._exit(0)
     
 def clean_CallBack(parent) :
     directory_List.clear()
@@ -420,5 +433,10 @@ t2 = part2()
 t2.start()
 
 init_gui()
+
+#/home/cenkerkaraors/Desktop/Test447/client
+#/home/cenkerkaraors/Desktop/Test447/server
+#/home/cenkerkaraors/Desktop/CS447Test/Client
+#/home/cenkerkaraors/Desktop/CS447Test/Server
 
 

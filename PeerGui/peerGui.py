@@ -13,6 +13,7 @@ import sys
 
 port = 5001
 directory_List = []
+ip = ''
 # Common
 def analyzeContent(directory):  # Takes a directory and returns a list of contents
     contentList = os.listdir(directory)
@@ -99,7 +100,7 @@ def sync_Server(folder, conn, server_socket):  # Syncs a folder takes folder and
     server_files = analyzeContent(folder)
     sendList(server_files, conn)
 
-    client_data = conn.recv(1024)
+    client_data = conn.recv(2048) # 1024
     client_files = pickle.loads(client_data)
 
     print("Server Files: :", server_files)
@@ -110,7 +111,7 @@ def sync_Server(folder, conn, server_socket):  # Syncs a folder takes folder and
 
     #I add thid
     sendList(outgoing, conn)
-    incoming_data = conn.recv(1024)
+    incoming_data = conn.recv(2048)
     incoming = pickle.loads(incoming_data)
     print("Server Is getting incoming" , incoming)
     # At this point we have all needed information
@@ -185,7 +186,7 @@ def sync_Client(client_folder, client_socket, ip, index):  # Syncs a folder take
     client_files = analyzeContent(client_folder)
     sendList(client_files, client_socket)
 
-    server_data = client_socket.recv(1024)
+    server_data = client_socket.recv(2048)
     server_files = pickle.loads(server_data)
 
     print("Client Files: :", client_files)
@@ -194,7 +195,7 @@ def sync_Client(client_folder, client_socket, ip, index):  # Syncs a folder take
     outgoing = compareFiles(client_files, server_files)
     #İ add
     sendList(outgoing, client_socket)
-    incoming_data = client_socket.recv(1024)
+    incoming_data = client_socket.recv(2048)
     incoming = pickle.loads(incoming_data)
     print("Client Is getting incoming" , incoming)
     # till here
@@ -265,9 +266,7 @@ def init_Server():
 
 def init_Client(index):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-    ip = ''
-    
-    print("Info", ip)
+    print("Info: ", ip)
     print("Host: ", ip)
 
     print("Client Started")
@@ -308,14 +307,33 @@ def add_CallBack():
 
 
 def sync_CallBack() :
+    #
+    ip_Page = Toplevel()
+    ip_Page.title("IP")
+    ip_Page.geometry('400x220+400+300')
 
-    myStr = ""
-    for x in range(len(directory_List)):
-        myStr = myStr + "From: " + directory_List[x][0] + " To: " + directory_List[x][1] + "\n"
-        init_Client(x)
-        print("Done: ", myStr)
+    ip_label = Label(ip_Page, text="IP: ")
+    ip_label.grid(row=1, column=1)
 
-    messagebox.showinfo(message="Sync Complete: \n" + myStr)
+    ip_entry = Entry(ip_Page, bd=2)
+    ip_entry.grid(row=2, column=2)
+
+    ip_add = Button(ip_Page, text="Ok", fg="black", command=partial(ip_CallBack, ip_entry,ip_Page))
+    ip_add.grid(row=3, column=2)
+
+    exit_button = Button(ip_Page, text="Exit", fg="black", command=partial(exit_CallBack, ip_Page))
+    exit_button.grid(row=4, column=2)
+    #
+
+    #myStr = ""
+    #for x in range(len(directory_List)):
+      #  myStr = myStr + "From: " + directory_List[x][0] + " To: " + directory_List[x][1] + "\n"
+       # init_Client(x)
+        #print("Done: ", myStr)
+
+    #messagebox.showinfo(message="Sync Complete: \n" + myStr)
+
+    ip_Page.mainloop()
 
 
 def exit_CallBack(page):
@@ -334,6 +352,18 @@ def dir_CallBack(src_entry, dest_entry):
     tup = (src_entry.get(), dest_entry.get())
     directory_List.append(tup)
     messagebox.showinfo(message="Directory Added: " + tup[0] + " -> " + tup[1])
+
+def ip_CallBack(ip_entry,page):
+    global ip
+    ip = ip_entry.get()
+    page.withdraw()
+    myStr = ""
+    for x in range(len(directory_List)):
+        myStr = myStr + "From: " + directory_List[x][0] + " To: " + directory_List[x][1] + "\n"
+        init_Client(x)
+        print("Done: ", myStr)
+
+    messagebox.showinfo(message="Sync Complete: \n" + myStr)
 
 
 def showDirs(parent):
@@ -377,13 +407,13 @@ def init_gui():
 
     root = Tk()
     root.title("S-Play")
-    root.geometry("600x600")
+    root.geometry("1000x600")
 
     # Frames
     top_frame = Frame(root, bg='#282828', bd=2)
     top_frame.pack(side=TOP, fill=X)
 
-    left_frame = Canvas(root, height=500, width=600, bg="#282828")
+    left_frame = Canvas(root, height=500, width=1000, bg="#282828")
     left_frame.pack()
 
     center_frame = Frame(left_frame, bg="white")
@@ -434,9 +464,6 @@ t2.start()
 
 init_gui()
 
-#/home/cenkerkaraors/Desktop/Test447/client
-#/home/cenkerkaraors/Desktop/Test447/server
-#/home/cenkerkaraors/Desktop/CS447Test/Client
-#/home/cenkerkaraors/Desktop/CS447Test/Server
+
 
 

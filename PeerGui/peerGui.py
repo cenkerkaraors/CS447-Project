@@ -14,7 +14,7 @@ import sys
 port = 5000
 directory_List = []
 ip = ''
-# Common
+
 def analyzeContent(directory):  # Takes a directory and returns a list of contents
     contentList = os.listdir(directory)
     contentTupleList = []
@@ -56,7 +56,6 @@ def compareFiles(list_self, list_peer):  # Makes a list of missing and updated f
     return outgoing
 
 
-# Server Specific
 def sendFile_Server(directory, file_name, server_socket):  # Send Files takes file_name and connection
     control = 1
     while control:
@@ -99,7 +98,7 @@ def sync_Server(folder, conn, server_socket):  # Syncs a folder takes folder and
     server_files = analyzeContent(folder)
     sendList(server_files, conn)
 
-    client_data = conn.recv(2048) # 1024
+    client_data = conn.recv(2048)
     client_files = pickle.loads(client_data)
 
     print("Source Files: :", server_files)
@@ -108,7 +107,6 @@ def sync_Server(folder, conn, server_socket):  # Syncs a folder takes folder and
     outgoing = compareFiles(server_files, client_files)
     print("Sending Files: ")
 
-    #I add thid
     sendList(outgoing, conn)
     incoming_data = conn.recv(2048)
     incoming = pickle.loads(incoming_data)
@@ -142,8 +140,6 @@ def sync_Server(folder, conn, server_socket):  # Syncs a folder takes folder and
             message = ""
             response = conn.recv(1024).decode()
 
-
-# Client Specific
 
 def recvFile_Client(directory, file_name, ip) :
     temp_socket = socket.socket()
@@ -212,7 +208,6 @@ def sync_Client(client_folder, client_socket, ip, index):  # Syncs a folder take
 
             response = client_socket.recv(1024).decode()  # continue or not
 
-    # Client Sends
     if(len(outgoing) != 0) :
         print("Sending Files: ")
         message = "1"
@@ -248,7 +243,7 @@ def init_Server():
         conn, address = server_socket.accept()
         print("Connected to Peer")
 
-        request = conn.recv(1024).decode()
+        request = conn.recv(1024).decode()  # Client Request
         print("Peer Request: ", request)
 
         message = "Your Request " + request
@@ -257,7 +252,6 @@ def init_Server():
         sync_Server(request, conn, server_socket)
 
         conn.close()
-        #control = 0
 
     server_socket.close()
     print("Closed")
@@ -322,6 +316,7 @@ def sync_CallBack() :
 
     exit_button = Button(ip_Page, text="Exit", fg="black", command=partial(exit_CallBack, ip_Page))
     exit_button.grid(row=4, column=2)
+
 
     ip_Page.mainloop()
 
@@ -454,4 +449,8 @@ t2.start()
 
 init_gui()
 
+#/home/cenkerkaraors/Desktop/Test447/Peer2
+#/home/cenkerkaraors/Desktop/Test447/cenker
+#/Users/Denis/Documents/peer
+#/Users/denis/Desktop/witcher3
 

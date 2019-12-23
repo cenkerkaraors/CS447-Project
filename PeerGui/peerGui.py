@@ -11,7 +11,7 @@ from os.path import isfile, join
 import pickle
 import sys
 
-port = 5001
+port = 5000
 directory_List = []
 ip = ''
 # Common
@@ -61,7 +61,7 @@ def sendFile_Server(directory, file_name, server_socket):  # Send Files takes fi
     control = 1
     while control:
         conn, address = server_socket.accept()
-        print("Connected to Client")
+        print("Connected to Peer")
 
         f = open(directory + "/" + file_name, 'rb')
         data = f.read(1024)
@@ -78,7 +78,7 @@ def recvFile_Server(directory, file_name, server_socket):
     control = 1
     while control:
         conn, address = server_socket.accept()
-        print("Connected to Client")
+        print("Connected to Peer")
 
         with open(directory + "/" + file_name, 'wb') as f:
             while True:
@@ -95,7 +95,6 @@ def recvFile_Server(directory, file_name, server_socket):
     print("File Received: ", file_name)
 
 
-# /home/cenkerkaraors/Desktop/CS447Test/Client
 def sync_Server(folder, conn, server_socket):  # Syncs a folder takes folder and connection
     server_files = analyzeContent(folder)
     sendList(server_files, conn)
@@ -103,17 +102,17 @@ def sync_Server(folder, conn, server_socket):  # Syncs a folder takes folder and
     client_data = conn.recv(2048) # 1024
     client_files = pickle.loads(client_data)
 
-    print("Server Files: :", server_files)
-    print("Client Files:", client_files)
+    print("Source Files: :", server_files)
+    print("Destination Files:", client_files)
 
     outgoing = compareFiles(server_files, client_files)
-    print("Sending Server Files: ")
+    print("Sending Files: ")
 
     #I add thid
     sendList(outgoing, conn)
     incoming_data = conn.recv(2048)
     incoming = pickle.loads(incoming_data)
-    print("Server Is getting incoming" , incoming)
+    print("Getting incoming" , incoming)
     # At this point we have all needed information
     if(len(outgoing) != 0) :
         message = "1"
@@ -132,7 +131,7 @@ def sync_Server(folder, conn, server_socket):  # Syncs a folder takes folder and
                     conn.send(message.encode())
 
     if(len(incoming) != 0): 
-        print("Server Receiving: ")
+        print("Peer Receiving: ")
         message = "ok"
         response = conn.recv(1024).decode()
         while (response == "1"):
@@ -181,7 +180,7 @@ def sync_Client(client_folder, client_socket, ip, index):  # Syncs a folder take
     client_socket.send(folder_request.encode())
 
     response = client_socket.recv(1024)
-    print("Server Response: ", response.decode())
+    print("Peer Response: ", response.decode())
 
     client_files = analyzeContent(client_folder)
     sendList(client_files, client_socket)
@@ -189,17 +188,17 @@ def sync_Client(client_folder, client_socket, ip, index):  # Syncs a folder take
     server_data = client_socket.recv(2048)
     server_files = pickle.loads(server_data)
 
-    print("Client Files: :", client_files)
-    print("Server Files:", server_files)
+    print("Source Files: :", client_files)
+    print("Destination Files:", server_files)
 
     outgoing = compareFiles(client_files, server_files)
-    #İ add
+
     sendList(outgoing, client_socket)
     incoming_data = client_socket.recv(2048)
     incoming = pickle.loads(incoming_data)
-    print("Client Is getting incoming" , incoming)
-    # till here
-    # At this point we have all needed informatio
+    print("Getting incoming" , incoming)
+
+    # At this point we have all needed information
     if(len(incoming) != 0): 
         message = "ok"
         response = client_socket.recv(1024).decode()
@@ -215,7 +214,7 @@ def sync_Client(client_folder, client_socket, ip, index):  # Syncs a folder take
 
     # Client Sends
     if(len(outgoing) != 0) :
-        print("Sending Client Files: ")
+        print("Sending Files: ")
         message = "1"
         client_socket.send(message.encode())
         for x in range(len(outgoing)):
@@ -240,17 +239,17 @@ def init_Server():
 
     server_socket.listen(10)
 
-    print("Server Started")
+    print("Started")
     print("Waiting Connection...")
 
 
     control = 1
     while control:
         conn, address = server_socket.accept()
-        print("Connected to Client")
+        print("Connected to Peer")
 
-        request = conn.recv(1024).decode()  # Client Request
-        print("Client Request: ", request)
+        request = conn.recv(1024).decode()
+        print("Peer Request: ", request)
 
         message = "Your Request " + request
         conn.send(message.encode())
@@ -269,9 +268,9 @@ def init_Client(index):
     print("Info: ", ip)
     print("Host: ", ip)
 
-    print("Client Started")
+    print("Started")
     client_socket.connect((ip, port))
-    print("Connected to Server")
+    print("Connected to Peer")
     sync_Client(directory_List[index][0], client_socket, ip,index)
 
     client_socket.close()
@@ -323,15 +322,6 @@ def sync_CallBack() :
 
     exit_button = Button(ip_Page, text="Exit", fg="black", command=partial(exit_CallBack, ip_Page))
     exit_button.grid(row=4, column=2)
-    #
-
-    #myStr = ""
-    #for x in range(len(directory_List)):
-      #  myStr = myStr + "From: " + directory_List[x][0] + " To: " + directory_List[x][1] + "\n"
-       # init_Client(x)
-        #print("Done: ", myStr)
-
-    #messagebox.showinfo(message="Sync Complete: \n" + myStr)
 
     ip_Page.mainloop()
 
@@ -463,15 +453,5 @@ t2 = part2()
 t2.start()
 
 init_gui()
-
-#/home/cenkerkaraors/Desktop/Test447/client
-#/home/cenkerkaraors/Desktop/Test447/server
-#/home/cenkerkaraors/Desktop/CS447Test/Client
-#/home/cenkerkaraors/Desktop/CS447Test/Server
-#/Users/denis/Documents/Server
-#ip = '192.168.1.20'  # home ipv4
-
-#ip = '192.168.43.220'
-#ip = '192.168.43.197'
 
 

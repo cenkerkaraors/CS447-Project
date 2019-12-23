@@ -464,5 +464,14 @@ t2.start()
 
 init_gui()
 
+#/home/cenkerkaraors/Desktop/Test447/client
+#/home/cenkerkaraors/Desktop/Test447/server
+#/home/cenkerkaraors/Desktop/CS447Test/Client
+#/home/cenkerkaraors/Desktop/CS447Test/Server
+#/Users/denis/Documents/Server
+#ip = '192.168.1.20'  # home ipv4
+
+#ip = '192.168.43.220'
+#ip = '192.168.43.197'
 
 

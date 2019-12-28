@@ -56,7 +56,7 @@ def compareFiles(list_self, list_peer):  # Makes a list of missing and updated f
     return outgoing
 
 
-def sendFile_Server(directory, file_name, server_socket):  # Send Files takes file_name and connection
+def sendFile_Server(directory, file_name, server_socket):  # Send Files takes directory, file_name and connection
     control = 1
     while control:
         conn, address = server_socket.accept()
@@ -243,7 +243,7 @@ def init_Server():
         conn, address = server_socket.accept()
         print("Connected to Peer")
 
-        request = conn.recv(1024).decode()  # Client Request
+        request = conn.recv(1024).decode()
         print("Peer Request: ", request)
 
         message = "Your Request " + request
@@ -448,9 +448,4 @@ t2 = part2()
 t2.start()
 
 init_gui()
-
-#/home/cenkerkaraors/Desktop/Test447/Peer2
-#/home/cenkerkaraors/Desktop/Test447/cenker
-#/Users/Denis/Documents/peer
-#/Users/denis/Desktop/witcher3
 
